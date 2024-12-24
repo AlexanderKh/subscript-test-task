@@ -1,7 +1,17 @@
 const _ = require('lodash');
 const todos = require('../database/todo-queries.js');
 const express = require('express')
+const {findBySessionToken} = require("../database/user-queries");
 const router = express.Router()
+
+const authenticateUser = async function (req, res, next) {
+    const sessionToken = req.cookies['sessionToken']
+    const user = await findBySessionToken({sessionToken})
+
+    req.user = user
+
+    next()
+}
 
 function createToDo(req, data) {
   const protocol = req.protocol, 
@@ -17,6 +27,7 @@ function createToDo(req, data) {
 }
 
 async function getAllTodos(req, res) {
+  const user = req.user
   const allEntries = await todos.all();
   return res.send(allEntries.map( _.curry(createToDo)(req) ));
 }
@@ -72,7 +83,7 @@ for (let route in routes) {
     routes[route] = addErrorReporting(routes[route].method, routes[route].errorMessage);
 }
 
-
+router.use(authenticateUser)
 router.get('/', routes.getAllTodos);
 router.get('/:id', routes.getTodo);
 
