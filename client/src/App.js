@@ -82,13 +82,6 @@ class App extends Component {
 
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Powered by React
-          </p>
-        </header>
-
         <form onSubmit={this.handleSubmit}>
           <p>
             <h3>Send to Server:</h3>
