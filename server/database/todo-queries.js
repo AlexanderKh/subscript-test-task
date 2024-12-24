@@ -1,7 +1,7 @@
 const knex = require("./connection.js");
 
-async function all() {
-    return knex('todos');
+async function all({ currentUser }) {
+    return knex('todos').where({ assignee_id: currentUser.id });
 }
 
 async function get(id) {

@@ -28,7 +28,7 @@ function createToDo(req, data) {
 
 async function getAllTodos(req, res) {
   const user = req.user
-  const allEntries = await todos.all();
+  const allEntries = await todos.all({ currentUser: user });
   return res.send(allEntries.map( _.curry(createToDo)(req) ));
 }
 
