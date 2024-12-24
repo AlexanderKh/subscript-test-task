@@ -1,6 +1,6 @@
 .idea
 
-server/.env
+/server/.env
 
 # dependencies
 /localhost-ssl
