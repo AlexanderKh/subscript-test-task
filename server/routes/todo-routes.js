@@ -6,7 +6,17 @@ const router = express.Router()
 
 const authenticateUser = async function (req, res, next) {
     const sessionToken = req.cookies['sessionToken']
+    if (!sessionToken) {
+        res.status(403).send('not authenticated')
+        return;
+    }
+
     const user = await findBySessionToken({sessionToken})
+
+    if (!user) {
+        res.status(403).send('not authenticated')
+        return;
+    }
 
     req.user = user
 
@@ -27,8 +37,7 @@ function createToDo(req, data) {
 }
 
 async function getAllTodos(req, res) {
-  const user = req.user
-  const allEntries = await todos.all({ currentUser: user });
+  const allEntries = await todos.all();
   return res.send(allEntries.map( _.curry(createToDo)(req) ));
 }
 
@@ -83,7 +92,7 @@ for (let route in routes) {
     routes[route] = addErrorReporting(routes[route].method, routes[route].errorMessage);
 }
 
-router.use(authenticateUser)
+// router.use(authenticateUser)
 router.get('/', routes.getAllTodos);
 router.get('/:id', routes.getTodo);
 

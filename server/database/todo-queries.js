@@ -1,7 +1,7 @@
 const knex = require("./connection.js");
 
-async function all({ currentUser }) {
-    return knex('todos').where({ assignee_id: currentUser.id });
+async function all() {
+    return await knex('todos');
 }
 
 async function get(id) {
@@ -26,7 +26,7 @@ async function del(id) {
 }
 
 async function clear() {
-    return knex('todos').del().returning('*');
+    return await knex('todos').del().returning('*');
 }
 
 module.exports = {
