@@ -1,7 +1,7 @@
 
 exports.up = function(knex) {
     return knex.schema.table('users', table => {
-        table.integer('organization_id');
+        table.integer('organization_id').notNullable();
         table.foreign('organization_id').references('organizations.id');
     })
 };

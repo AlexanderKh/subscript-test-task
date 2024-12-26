@@ -4,9 +4,9 @@ exports.up = function(knex) {
         table.increments('id');
         table.text('content').notNullable();
         table.dateTime('created_at').notNullable();
-        table.integer('todo_id');
+        table.integer('todo_id').notNullable();
         table.foreign('todo_id').references('todos.id');
-        table.integer('author_id');
+        table.integer('author_id').notNullable();
         table.foreign('author_id').references('users.id');
     });
 };
