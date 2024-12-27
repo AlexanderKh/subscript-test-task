@@ -59,12 +59,13 @@ describe('Todo-Backend API', () => {
 
         describe('with todo', () => {
             beforeEach(async () => {
-                await knex('todos').insert({
+                const saveTodoResult = await knex('todos').insert({
                     title: 'TestToDo',
                     order: 0,
                     completed: false,
                     organization_id: this.organization.id
-                })
+                }).returning('*');
+                this.todo = saveTodoResult[0]
             })
 
             it("returns all todos that user can see", async () => {
@@ -79,6 +80,21 @@ describe('Todo-Backend API', () => {
                     order: 0,
                     completed: false,
                     organization_id: this.organization.id
+                });
+            });
+
+            it("saves posted comment", async () => {
+                const testRequest = request.post(`/todos/${this.todo.id}/comments`, {
+                    content: "test comment"
+                });
+                testRequest.set('Cookie', `sessionToken=${this.sessionToken}`);
+
+                const response = await testRequest;
+
+                expect(response.status).toBe(200);
+                expect(response.body).toMatchObject({
+                    content: 'test comment',
+                    todo_id: this.todo.id,
                 });
             });
         })

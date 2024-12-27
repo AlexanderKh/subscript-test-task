@@ -4,7 +4,7 @@ async function findByOrganizationId({ organization_id }) {
     return await knex('todos').where({ organization_id });
 }
 
-async function get(id) {
+async function get({id}) {
     const results = await knex('todos').where({ id });
     return results[0];
 }
