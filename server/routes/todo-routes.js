@@ -27,22 +27,20 @@ const authenticateUser = async function (req, res, next) {
     next()
 }
 
-function createToDo(req, data) {
-  const protocol = req.protocol, 
-    host = req.get('host'), 
-    id = data.id;
-
+function presentTodoForResponse(data) {
   return {
+    id: data.id,
+    organization_id: data.organization_id,
+    assignee_id: data.assignee_id,
     title: data.title,
     order: data.order,
     completed: data.completed || false,
-    url: `${protocol}://${host}/${id}`
   };
 }
 
-async function getAllTodos(req, res) {
-  const allEntries = await todos.all();
-  return res.send(allEntries.map( _.curry(createToDo)(req) ));
+async function getVisibleTodos(req, res) {
+  const allEntries = await todos.findByOrganizationId({ organization_id: req.organization.id });
+  return res.send(allEntries.map( presentTodoForResponse ));
 }
 
 async function getTodo(req, res) {
@@ -52,23 +50,23 @@ async function getTodo(req, res) {
 
 async function postTodo(req, res) {
   const created = await todos.create(req.body.title, req.body.order);
-  return res.send(createToDo(req, created));
+  return res.send(presentTodoForResponse(req, created));
 }
 
-async function patchTodo(req, res) {
-  const patched = await todos.update(req.params.id, req.body);
-  return res.send(createToDo(req, patched));
-}
-
-async function deleteAllTodos(req, res) {
-  const deletedEntries = await todos.clear();
-  return res.send(deletedEntries.map( _.curry(createToDo)(req) ));
-}
-
-async function deleteTodo(req, res) {
-  const deleted = await todos.delete(req.params.id);
-  return res.send(createToDo(req, deleted));
-}
+// async function patchTodo(req, res) {
+//   const patched = await todos.update(req.params.id, req.body);
+//   return res.send(presentTodoForResponse(req, patched));
+// }
+//
+// async function deleteAllTodos(req, res) {
+//   const deletedEntries = await todos.clear();
+//   return res.send(deletedEntries.map( _.curry(presentTodoForResponse)(req) ));
+// }
+//
+// async function deleteTodo(req, res) {
+//   const deleted = await todos.delete(req.params.id);
+//   return res.send(presentTodoForResponse(req, deleted));
+// }
 
 function addErrorReporting(func, message) {
     return async function(req, res) {
@@ -84,27 +82,27 @@ function addErrorReporting(func, message) {
 }
 
 const routes = {
-    getAllTodos: { method: getAllTodos, errorMessage: "Could not fetch all todos" },
+    getVisibleTodos: { method: getVisibleTodos, errorMessage: "Could not fetch all todos" },
     getTodo: { method: getTodo, errorMessage: "Could not fetch todo" },
     postTodo: { method: postTodo, errorMessage: "Could not post todo" },
-    patchTodo: { method: patchTodo, errorMessage: "Could not patch todo" },
-    deleteAllTodos: { method: deleteAllTodos, errorMessage: "Could not delete all todos" },
-    deleteTodo: { method: deleteTodo, errorMessage: "Could not delete todo" }
+    // patchTodo: { method: patchTodo, errorMessage: "Could not patch todo" },
+    // deleteAllTodos: { method: deleteAllTodos, errorMessage: "Could not delete all todos" },
+    // deleteTodo: { method: deleteTodo, errorMessage: "Could not delete todo" }
 }
 
 for (let route in routes) {
     routes[route] = addErrorReporting(routes[route].method, routes[route].errorMessage);
 }
 
-// router.use(authenticateUser)
-router.get('/', routes.getAllTodos);
+router.use(authenticateUser)
+router.get('/', routes.getVisibleTodos);
 router.get('/:id', routes.getTodo);
 
 router.post('/', routes.postTodo);
-router.patch('/:id', routes.patchTodo);
 
-router.delete('/', routes.deleteAllTodos);
-router.delete('/:id', routes.deleteTodo);
+// router.patch('/:id', routes.patchTodo);
+// router.delete('/', routes.deleteAllTodos);
+// router.delete('/:id', routes.deleteTodo);
 
 
 module.exports = router;

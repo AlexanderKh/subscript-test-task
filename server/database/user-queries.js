@@ -8,7 +8,6 @@ async function findByUsername({ username }) {
 
 async function findBySessionToken({ sessionToken }) {
     const results = await knex('users').where({ session_token: sessionToken });
-    console.log(results);
     return results.length > 0 ? results[0] : null;
 }
 

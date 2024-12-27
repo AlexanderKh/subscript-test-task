@@ -27,6 +27,63 @@ describe('Todo-Backend API', () => {
         });
     });
 
+    describe("Todo API", () => {
+        beforeEach(async () => {
+            const orgSaveResult = await knex('organizations').insert({ name: 'TestCorp' }).returning('*');
+            this.organization = orgSaveResult[0];
+
+            await request.post('/users/register', {
+                "username": "test_user",
+                "password": "testtest1",
+                "organization_name": this.organization.name
+            });
+            await request.post('/users/login', {
+                "username": "test_user",
+                "password": "testtest1"
+            });
+
+            const userQueryResult = await knex('users').where({ username: 'test_user' }).returning('*');
+            this.user = userQueryResult[0];
+            this.sessionToken = this.user.session_token
+        })
+
+        it("returns all todos that user can see", async () => {
+            const testRequest = request.get('/todos');
+            testRequest.set('Cookie', `sessionToken=${this.sessionToken}`);
+
+            const response = await testRequest;
+
+            expect(response.status).toBe(200);
+            expect(response.body.length).toEqual(0)
+        });
+
+        describe('with todo', () => {
+            beforeEach(async () => {
+                await knex('todos').insert({
+                    title: 'TestToDo',
+                    order: 0,
+                    completed: false,
+                    organization_id: this.organization.id
+                })
+            })
+
+            it("returns all todos that user can see", async () => {
+                const testRequest = request.get('/todos');
+                testRequest.set('Cookie', `sessionToken=${this.sessionToken}`);
+
+                const response = await testRequest;
+
+                expect(response.status).toBe(200);
+                expect(response.body[0]).toMatchObject({
+                    title: 'TestToDo',
+                    order: 0,
+                    completed: false,
+                    organization_id: this.organization.id
+                });
+            });
+        })
+    });
+
     describe("User API", () => {
         beforeEach(async () => {
             const queryResult = await knex('organizations').insert({ name: 'TestCorp' }).returning('*');

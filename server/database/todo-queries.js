@@ -1,7 +1,7 @@
 const knex = require("./connection.js");
 
-async function all() {
-    return await knex('todos');
+async function findByOrganizationId({ organization_id }) {
+    return await knex('todos').where({ organization_id });
 }
 
 async function get(id) {
@@ -30,7 +30,7 @@ async function clear() {
 }
 
 module.exports = {
-    all,
+    findByOrganizationId,
     get,
     create,
     update,
