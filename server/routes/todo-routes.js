@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const todos = require('../database/todo-queries.js');
 const express = require('express')
+const {findByOrganizationById} = require("../database/organization-queries");
 const {findBySessionToken} = require("../database/user-queries");
 const router = express.Router()
 
@@ -18,7 +19,10 @@ const authenticateUser = async function (req, res, next) {
         return;
     }
 
+    const organization = await findByOrganizationById({id: user.organization_id})
+
     req.user = user
+    req.organization = organization
 
     next()
 }

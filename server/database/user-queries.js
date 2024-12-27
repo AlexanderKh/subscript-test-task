@@ -12,8 +12,8 @@ async function findBySessionToken({ sessionToken }) {
     return results.length > 0 ? results[0] : null;
 }
 
-async function createUser({ username, password_hash }) {
-    const results = await knex('users').insert({ username, password_hash }).returning('*');
+async function createUser({ username, password_hash, organization_id }) {
+    const results = await knex('users').insert({ username, password_hash, organization_id }).returning('*');
     return results.length > 0 ? results[0] : null;
 }
 
