@@ -49,8 +49,12 @@ async function getTodo(req, res) {
 }
 
 async function postTodo(req, res) {
-  const created = await todos.create(req.body.title, req.body.order);
-  return res.send(presentTodoForResponse(req, created));
+  const created = await todos.create({
+      title: req.body.title,
+      order: req.body.order,
+      organization_id: req.organization.id,
+  });
+  return res.send(presentTodoForResponse(created));
 }
 
 // async function patchTodo(req, res) {
